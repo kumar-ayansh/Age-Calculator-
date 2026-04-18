@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Age Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary: #1565C0;
+            --primary-dark: #0D47A1;
+            --accent: #F57C00;
+            --green: #388E3C;
+            --yellow: #F9A825;
+            --bg: #EEF2F7;
+            --white: #FFFFFF;
+            --text: #1A237E;
+            --muted: #78909C;
+            --shadow: rgba(21,101,192,0.13);
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            max-width: 420px;
+            margin: 0 auto;
+            overflow-x: hidden;
+        }
+
+        .page { display: none; min-height: 100vh; flex-direction: column; }
+        .page.active { display: flex; }
+
+        /* HEADER */
+        .header {
+            background: linear-gradient(160deg, #1976D2 0%, #1565C0 55%, #0D47A1 100%);
+            padding-bottom: 52px;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -2px; left: 0; right: 0;
+            height: 56px;
+            background: var(--bg);
+            border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+        }
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px 8px;
+        }
+        .icon-btn {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            border-radius: 8px;
+            width: 38px; height: 38px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            color: white;
+            font-size: 18px;
+        }
+        .header h1 { color: white; font-size: 22px; font-weight: 800; }
+
+        /* PAGE 1 */
+        .p1-content { padding: 0 16px 30px; flex: 1; }
+
+        .section-label {
+            font-size: 13px; font-weight: 700;
+            color: var(--muted); text-transform: uppercase;
+            letter-spacing: 0.06em; margin: 18px 0 8px 4px;
+        }
+
+        .date-card {
+            background: var(--white);
+            border-radius: 14px;
+            padding: 14px 18px;
+            display: flex; align-items: center; gap: 14px;
+            box-shadow: 0 2px 12px var(--shadow);
+        }
+        .date-icon {
+            width: 46px; height: 46px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; flex-shrink: 0;
+        }
+        .date-icon.c { background: #FFF3E0; }
+        .date-icon.b { background: #E3F2FD; }
+
+        .date-info { flex: 1; }
+        .date-info label {
+            font-size: 11px; color: var(--muted); font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.05em;
+            display: block; margin-bottom: 3px;
+        }
+        .date-info .val { font-size: 19px; font-weight: 800; color: var(--text); }
+
+        input[type="date"] {
+            border: none; outline: none;
+            font-family: 'Nunito', sans-serif;
+            font-size: 19px; font-weight: 800;
+            color: var(--text); background: transparent; width: 100%;
+        }
+
+     .btn-row {
+         backdrop-filter: blur(10px);
+    position: fixed;
+    bottom: 20px;   /* niche gap */
+    left: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center; /* center me laane ke liye */
+    gap: 12px;
+    padding: 0 16px;
+    
+}
+        .btn-round {
+            width: 56px; height: 56px; border-radius: 50%; border: none;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            cursor: pointer; font-family: 'Nunito', sans-serif;
+            font-size: 9px; font-weight: 800; letter-spacing: 0.05em;
+            gap: 1px; transition: transform 0.15s; flex-shrink: 0;
+        }
+        .btn-round:active { transform: scale(0.91); }
+        .btn-clear { background: var(--yellow); color: #4E342E; box-shadow: 0 3px 12px rgba(249,168,37,0.45); }
+        .btn-add   { background: var(--green);  color: white;   box-shadow: 0 3px 12px rgba(56,142,60,0.4); }
+        .btn-calc {
+            flex: 1; height: 56px; border-radius: 28px;
+            background: linear-gradient(135deg, var(--accent) 0%, #E65100 100%);
+            color: white; border: none;
+            font-family: 'Nunito', sans-serif; font-size: 18px; font-weight: 900;
+            cursor: pointer; box-shadow: 0 4px 18px rgba(245,124,0,0.45);
+            transition: all 0.18s;
+        }
+        .btn-calc:active { transform: scale(0.96); }
+
+        /* PAGE 2 */
+        .p2-content { padding: 0 16px 30px; flex: 1; overflow-y: auto; }
+
+        /* ---- NEXT BIRTHDAY SECTION ---- */
+        .bday-title {
+            font-size: 15px; font-weight: 800; color: var(--text);
+            margin: 16px 0 8px 2px;
+        }
+
+        /* Top row: Days / Hrs / Min / Sec — 4 cols */
+        .bday-top-table {
+            width: 100%;
+            border-collapse: separate; border-spacing: 0;
+            border-radius: 10px; overflow: hidden;
+            box-shadow: 0 2px 10px var(--shadow);
+            margin-bottom: 6px;
+        }
+        .bday-top-table thead tr th {
+            background: var(--primary);
+            color: white; font-size: 12px; font-weight: 800;
+            padding: 9px 0; text-align: center; letter-spacing: 0.03em;
+        }
+        .bday-top-table thead tr th:not(:last-child) { border-right: 1px solid rgba(255,255,255,0.2); }
+        .bday-top-table tbody tr td {
+            background: white; text-align: center;
+            font-size: 22px; font-weight: 900; color: var(--text); padding: 12px 0;
+        }
+        .bday-top-table tbody tr td:not(:last-child) { border-right: 1px solid #E3EAF4; }
+        .bday-top-table tbody tr td.live-val { color: #D84315; }
+
+        /* Bottom row: Months / Days remaining small */
+        .bday-bottom-table {
+            width: 100%;
+            border-collapse: separate; border-spacing: 0;
+            border-radius: 10px; overflow: hidden;
+            box-shadow: 0 2px 10px var(--shadow);
+            margin-bottom: 14px;
+        }
+        .bday-bottom-table thead tr th {
+            background: #0D47A1;
+            color: white; font-size: 12px; font-weight: 800;
+            padding: 8px 0; text-align: center;
+        }
+        .bday-bottom-table thead tr th:not(:last-child) { border-right: 1px solid rgba(255,255,255,0.2); }
+        .bday-bottom-table tbody tr td {
+            background: #F5F9FF; text-align: center;
+            font-size: 20px; font-weight: 900; color: var(--text); padding: 10px 0;
+        }
+        .bday-bottom-table tbody tr td:not(:last-child) { border-right: 1px solid #E3EAF4; }
+
+        /* ---- FULL AGE SUMMARY (one-liner card) ---- */
+        .summary-title {
+            font-size: 15px; font-weight: 800; color: var(--text);
+            margin: 18px 0 8px 2px;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #0D47A1 0%, #1565C0 100%);
+            border-radius: 12px;
+            padding: 14px 16px;
+            box-shadow: 0 4px 16px rgba(13,71,161,0.3);
+            margin-bottom: 14px;
+        }
+
+        .summary-line {
+            color: white;
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1.9;
+            letter-spacing: 0.01em;
+        }
+
+        .summary-line span.num {
+            color: #FFD54F;
+            font-size: 15px;
+            font-weight: 900;
+        }
+
+        .summary-line span.unit {
+            color: #90CAF9;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* ---- EXTRA INFO TABLE ---- */
+        .info-title {
+            font-size: 15px; font-weight: 800; color: var(--text);
+            margin: 18px 0 8px 2px;
+        }
+        .info-table {
+            width: 100%;
+            border-collapse: separate; border-spacing: 0;
+            border-radius: 10px; overflow: hidden;
+            box-shadow: 0 2px 10px var(--shadow);
+        }
+        .info-table tr td {
+            padding: 12px 16px; font-size: 15px; font-weight: 700;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .info-table tr:last-child td { border-bottom: none; }
+        .info-table tr td:first-child {
+            background: var(--accent); color: white;
+            width: 42%; font-size: 14px; font-weight: 800;
+        }
+        .info-table tr:nth-child(even) td:first-child { background: #E65100; }
+        .info-table tr td:last-child {
+            background: white; color: var(--text);
+            font-size: 16px; font-weight: 800; text-align: right;
+        }
+        .info-table tr:nth-child(even) td:last-child { background: #FAFAFA; }
+        .info-table tr.star-row td:first-child { background: var(--primary); }
+        .info-table tr.star-row td:last-child { color: var(--primary); }
+        .info-table tr.live-row td:first-child { background: #BF360C; }
+        .info-table tr.live-row td:last-child { color: #BF360C; }
+
+        /* Live dot */
+        .live-dot {
+            display: inline-block; width: 7px; height: 7px;
+            background: #4CAF50; border-radius: 50%;
+            margin-right: 4px; animation: blink 1s infinite;
+            vertical-align: middle;
+        }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+        /* Action row */
+        .action-row { display: flex; gap: 10px; margin-top: 16px; }
+        .act-btn {
+            flex: 1; padding: 13px; background: var(--white);
+            border: none; border-radius: 12px;
+            font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 800;
+            color: var(--primary); cursor: pointer;
+            box-shadow: 0 2px 10px var(--shadow); transition: all 0.18s;
+        }
+        .act-btn:active { background: var(--primary); color: white; }
+
+        /* Toast */
+        .toast {
+            position: fixed; bottom: 24px; left: 50%;
+            transform: translateX(-50%) translateY(60px);
+            background: #263238; color: #90CAF9;
+            padding: 10px 22px; border-radius: 30px;
+            font-size: 13px; font-weight: 700;
+            transition: transform 0.3s; z-index: 999;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+<body>
+
+<div class="toast" id="toast">Copied! ✓</div>
+
+<!-- PAGE 1 -->
+<div class="page active" id="page1">
+    <div class="header">
+        <div class="topbar">
+            <button class="icon-btn">☰</button>
+            <h1>Age Calculator</h1>
+            <div class="icon-btn" style="background:transparent"></div>
+        </div>
+    </div>
+    <div class="p1-content">
+        <div class="section-label">Current Date</div>
+        <div class="date-card">
+            <div class="date-icon c">📅</div>
+            <div class="date-info">
+                <label>Today</label>
+                <div class="val" id="today-display">—</div>
+            </div>
+        </div>
+
+        <div class="section-label">Birth Date</div>
+        <div class="date-card">
+            <div class="date-icon b">🗓️</div>
+            <div class="date-info">
+                <label>Date of Birth</label>
+                <input type="date" id="dob" />
+            </div>
+        </div>
+
+        <div class="btn-row">
+            <button class="btn-round btn-clear" onclick="clearAll()">
+                <span style="font-size:22px">🧹</span><span>Clear</span>
+            </button>
+            <button class="btn-calc" onclick="goCalculate()">Calculate</button>
+            <button class="btn-round btn-add" onclick="copyResult()">
+                <span style="font-size:22px">📋</span><span>Copy</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- PAGE 2 -->
+<div class="page" id="page2">
+    <div class="header">
+        <div class="topbar">
+            <button class="icon-btn" onclick="goBack()">←</button>
+            <h1>Age Calculator</h1>
+            <div class="icon-btn" style="background:transparent"></div>
+        </div>
+    </div>
+    <div class="p2-content">
+
+        <!-- NEXT BIRTHDAY -->
+        <div class="bday-title">🎂 Next Birthday Countdown</div>
+    
+       <!-- Static: Months / Remaining days -->
+        <table class="bday-bottom-table">
+            <thead>
+                <tr>
+                    <th>Months Left</th>
+                    <th>Total Days Left</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td id="bd-mo">0</td>
+                    <td id="bd-td">0</td>
+                    <td id="bd-date">—</td>
+                </tr>
+            </tbody>
+        </table>
+
+    
+
+
+        <!-- Live: Days / Hours / Mins / Secs -->
+        <table class="bday-top-table">
+            <thead>
+                <tr>
+                    <th>Days</th>
+                    <th>Hours</th>
+                    <th>Minutes</th>
+                    <th>Seconds</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td id="cd-d">0</td>
+                    <td id="cd-h" class="live-val">0</td>
+                    <td id="cd-m" class="live-val">0</td>
+                    <td id="cd-s" class="live-val">0</td>
+                </tr>
+            </tbody>
+        </table>
+
+     
+        <!-- FULL AGE SUMMARY CARD -->
+        <div class="summary-title">📊 Your Complete Age</div>
+        <div class="summary-card">
+            <div class="summary-line" id="summary-line">—</div>
+        </div>
+
+        <!-- EXTRA INFO TABLE -->
+        <div class="info-title">Extra Information</div>
+        <table class="info-table">
+            <tr><td>Years</td><td id="r-years">—</td></tr>
+            <tr><td>Months</td><td id="r-months">—</td></tr>
+            <tr><td>Weeks</td><td id="r-weeks">—</td></tr>
+            <tr><td>Days</td><td id="r-days">—</td></tr>
+            <tr class="live-row"><td><span class="live-dot"></span>Hours</td><td id="r-hours">—</td></tr>
+            <tr class="live-row"><td><span class="live-dot"></span>Minutes</td><td id="r-minutes">—</td></tr>
+            <tr class="live-row"><td><span class="live-dot"></span>Seconds</td><td id="r-seconds">—</td></tr>
+            <tr class="star-row"><td>Star</td><td id="r-zodiac">—</td></tr>
+            <tr class="star-row"><td>Day Born</td><td id="r-dayborn">—</td></tr>
+        </table>
+
+        <div class="action-row">
+            <button class="act-btn" onclick="goBack()">← Back</button>
+            <button class="act-btn" onclick="copyResult()">📋 Copy</button>
+            <button class="act-btn" onclick="shareResult()">↗ Share</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let dobDate = null;
+    let ticker = null;
+    let nextBday = null;
+
+    const DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+    const MONTHS_NAME = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const ZODIACS = [
+        {name:"Capricorn ♑",m1:12,d1:22,m2:1,d2:19},
+        {name:"Aquarius ♒",m1:1,d1:20,m2:2,d2:18},
+        {name:"Pisces ♓",m1:2,d1:19,m2:3,d2:20},
+        {name:"Aries ♈",m1:3,d1:21,m2:4,d2:19},
+        {name:"Taurus ♉",m1:4,d1:20,m2:5,d2:20},
+        {name:"Gemini ♊",m1:5,d1:21,m2:6,d2:20},
+        {name:"Cancer ♋",m1:6,d1:21,m2:7,d2:22},
+        {name:"Leo ♌",m1:7,d1:23,m2:8,d2:22},
+        {name:"Virgo ♍",m1:8,d1:23,m2:9,d2:22},
+        {name:"Libra ♎",m1:9,d1:23,m2:10,d2:22},
+        {name:"Scorpio ♏",m1:10,d1:23,m2:11,d2:21},
+        {name:"Sagittarius ♐",m1:11,d1:22,m2:12,d2:21},
+    ];
+
+    function getZodiac(m, d) {
+        for (let z of ZODIACS)
+            if ((m===z.m1 && d>=z.d1)||(m===z.m2 && d<=z.d2)) return z.name;
+        return "Capricorn ♑";
+    }
+
+    function pad(n){ return String(n).padStart(2,'0'); }
+
+    function showToday() {
+        const now = new Date();
+        document.getElementById("today-display").textContent =
+            `${pad(now.getDate())} / ${pad(now.getMonth()+1)} / ${now.getFullYear()}`;
+    }
+
+    function goCalculate() {
+        const val = document.getElementById("dob").value;
+        if (!val) { alert("Please select Date of Birth!"); return; }
+
+        dobDate = new Date(val);
+        localStorage.setItem("lastDOB", val);
+
+        const now = new Date();
+
+        // ---- Static age calc ----
+        let yrs = now.getFullYear() - dobDate.getFullYear();
+        let mos = now.getMonth() - dobDate.getMonth();
+        let dys = now.getDate() - dobDate.getDate();
+        if (mos < 0 || (mos === 0 && dys < 0)) { yrs--; mos += 12; }
+        if (dys < 0) dys += new Date(now.getFullYear(), now.getMonth(), 0).getDate();
+
+        const totalDays  = Math.floor((now - dobDate) / 86400000);
+        const totalWeeks = Math.floor(totalDays / 7);
+        const totalMonths= yrs * 12 + mos;
+
+        document.getElementById("r-years").textContent  = yrs.toLocaleString();
+        document.getElementById("r-months").textContent = totalMonths.toLocaleString();
+        document.getElementById("r-weeks").textContent  = totalWeeks.toLocaleString();
+        document.getElementById("r-days").textContent   = totalDays.toLocaleString();
+
+        // Zodiac & day
+        const bm = dobDate.getMonth()+1, bd = dobDate.getDate();
+        document.getElementById("r-zodiac").textContent  = getZodiac(bm, bd);
+        document.getElementById("r-dayborn").textContent = DAYS[dobDate.getDay()];
+
+        // ---- Next Birthday static info ----
+        nextBday = new Date(now.getFullYear(), dobDate.getMonth(), dobDate.getDate());
+        if (nextBday <= now) nextBday.setFullYear(now.getFullYear() + 1);
+
+        const diffMs   = nextBday - now;
+        const totalLeft= Math.ceil(diffMs / 86400000);
+        const moLeft   = Math.floor(totalLeft / 30.44);
+        const bdDateStr= `${pad(nextBday.getDate())} ${MONTHS_NAME[nextBday.getMonth()]} ${nextBday.getFullYear()}`;
+
+        document.getElementById("bd-mo").textContent   = moLeft;
+        document.getElementById("bd-td").textContent   = totalLeft;
+        document.getElementById("bd-date").textContent = bdDateStr;
+
+        // ---- Summary card ----
+        buildSummary(yrs, mos, dys, totalMonths, totalWeeks, totalDays);
+
+        // ---- Live ticker ----
+        if (ticker) clearInterval(ticker);
+        updateLive();
+        ticker = setInterval(updateLive, 1000);
+
+        // Switch page
+        document.getElementById("page1").classList.remove("active");
+        document.getElementById("page2").classList.add("active");
+        window.scrollTo(0,0);
+    }
+
+    function buildSummary(yrs, mos, dys, totalMonths, totalWeeks, totalDays) {
+        // One-liner with all units
+        const html =
+            `<span class="num">${yrs}</span><span class="unit"> yrs</span>  ` +
+            `<span class="num">${mos}</span><span class="unit"> mo</span>  ` +
+            `<span class="num">${dys}</span><span class="unit"> days</span>` +
+            `<br>` +
+            `<span class="num">${totalMonths.toLocaleString()}</span><span class="unit"> total months</span>  ` +
+            `<span class="num">${totalWeeks.toLocaleString()}</span><span class="unit"> total weeks</span>` +
+            `<br>` +
+            `<span class="num">${totalDays.toLocaleString()}</span><span class="unit"> total days</span>  ` +
+            `<span id="sum-hrs" class="num">—</span><span class="unit"> total hrs</span>` +
+            `<br>` +
+            `<span id="sum-min" class="num">—</span><span class="unit"> total mins</span>  ` +
+            `<span id="sum-sec" class="num">—</span><span class="unit"> total secs</span>`;
+        document.getElementById("summary-line").innerHTML = html;
+    }
+
+    function updateLive() {
+        if (!dobDate) return;
+        const now = new Date();
+
+        // Age live
+        const totalSec = Math.floor((now - dobDate) / 1000);
+        const totalMin = Math.floor(totalSec / 60);
+        const totalHr  = Math.floor(totalMin / 60);
+
+        document.getElementById("r-hours").textContent   = totalHr.toLocaleString();
+        document.getElementById("r-minutes").textContent = totalMin.toLocaleString();
+        document.getElementById("r-seconds").textContent = totalSec.toLocaleString();
+
+        // Summary live fields
+        const sh = document.getElementById("sum-hrs");
+        const sm = document.getElementById("sum-min");
+        const ss = document.getElementById("sum-sec");
+        if (sh) sh.textContent = totalHr.toLocaleString();
+        if (sm) sm.textContent = totalMin.toLocaleString();
+        if (ss) ss.textContent = totalSec.toLocaleString();
+
+        // Birthday countdown live
+        if (!nextBday) return;
+        let diff = nextBday - now;
+        if (diff < 0) {
+            // recalculate next year
+            nextBday = new Date(now.getFullYear(), dobDate.getMonth(), dobDate.getDate());
+            if (nextBday <= now) nextBday.setFullYear(now.getFullYear() + 1);
+            diff = nextBday - now;
+        }
+
+        const cdTotalSec = Math.floor(diff / 1000);
+        const cdSec  = cdTotalSec % 60;
+        const cdMin  = Math.floor(cdTotalSec / 60) % 60;
+        const cdHr   = Math.floor(cdTotalSec / 3600) % 24;
+        const cdDays = Math.floor(cdTotalSec / 86400);
+
+        document.getElementById("cd-d").textContent = cdDays;
+        document.getElementById("cd-h").textContent = pad(cdHr);
+        document.getElementById("cd-m").textContent = pad(cdMin);
+        document.getElementById("cd-s").textContent = pad(cdSec);
+    }
+
+    function goBack() {
+        document.getElementById("page2").classList.remove("active");
+        document.getElementById("page1").classList.add("active");
+        if (ticker) clearInterval(ticker);
+    }
+
+    function clearAll() {
+        document.getElementById("dob").value = "";
+        dobDate = null; nextBday = null;
+        if (ticker) clearInterval(ticker);
+        localStorage.removeItem("lastDOB");
+    }
+
+    function copyResult() {
+        if (!dobDate) { alert("Calculate first!"); return; }
+        const y = document.getElementById("r-years").textContent;
+        const m = document.getElementById("r-months").textContent;
+        const d = document.getElementById("r-days").textContent;
+        const s = document.getElementById("r-seconds").textContent;
+        const z = document.getElementById("r-zodiac").textContent;
+        navigator.clipboard.writeText(
+            `Age: ${y} yrs | ${m} months | ${d} days | ${s} secs | Star: ${z}`
+        ).then(() => {
+            const t = document.getElementById("toast");
+            t.classList.add("show");
+            setTimeout(() => t.classList.remove("show"), 2000);
+        });
+    }
+
+    function shareResult() {
+        if (!dobDate) return;
+        const y = document.getElementById("r-years").textContent;
+        if (navigator.share) navigator.share({ title: "My Age", text: `I am ${y} years old! 🎂` });
+        else copyResult();
+    }
+
+    showToday();
+    window.onload = () => {
+        showToday();
+        const last = localStorage.getItem("lastDOB");
+        if (last) document.getElementById("dob").value = last;
+    };
+</script>
+</body>
+</html>
